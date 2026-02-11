@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delete Grade - Grade Recording System</title>
+    <style>
+        body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; min-height:100vh; display:flex; flex-direction:column;}
+        header { background: linear-gradient(135deg, #16213e 0%, #0f3460 100%); color:white; text-align:center; padding:40px 20px; box-shadow:0 10px 30px rgba(0,0,0,0.3); }
+        header h1 { font-size:2.2em; margin:0; text-shadow:0 2px 10px rgba(0,0,0,0.5); }
+        footer { margin-top:auto; background:#16213e; color:#bdc3c7; text-align:center; padding:25px; font-size:14px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Deleting Grade...</h1>
+</header>
+
+<script type="module">
+    import { db } from './firebase.js';
+    import { deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+   
+    const params = new URLSearchParams(window.location.search);
+    const gradeId = params.get('grade_id');
+    const subjectId = params.get('subject_id');
+
+   
+    async function deleteGrade() {
+        try {
+            await deleteDoc(doc(db, "grades", gradeId)); 
+            alert("✅ Grade deleted successfully!");
+            window.location.href = `records.html?subject_id=${subjectId}`; 
+        } catch (error) {
+            console.error("Error deleting document: ", error);
+            alert("❌ Error deleting the grade.");
+            window.location.href = `records.html?subject_id=${subjectId}`; /
+        }
+    }
+
+    
+    deleteGrade();
+</script>
+
+<footer>
+    <p>&copy; 2026 Grade Recording System</p>
+</footer>
+
+</body>
+</html>

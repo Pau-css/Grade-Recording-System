@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subjects - Grade Recording System</title>
+    <style>
+        body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+        header { background: linear-gradient(135deg, #16213e 0%, #0f3460 100%); color: white; text-align: center; padding: 40px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        header h1 { font-size: 2.2em; margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        nav { background: rgba(22, 33, 62, 0.95); backdrop-filter: blur(10px); padding: 15px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        nav ul { display: flex; justify-content: center; gap: 40px; list-style: none; margin: 0; padding: 0; }
+        nav a { color: #ecf0f1; text-decoration: none; font-weight: 600; padding: 10px 25px; border-radius: 25px; transition: all 0.3s ease; font-size: 15px; border: 2px solid transparent; }
+        nav a:hover { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.3); }
+        .subjects-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; }
+        .subject-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 25px; padding: 35px; box-shadow: 0 25px 60px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); position: relative; overflow: hidden; transition: all 0.4s ease; text-decoration: none; color: inherit; display: block; }
+        .subject-card:hover { transform: translateY(-10px); box-shadow: 0 35px 80px rgba(0,0,0,0.3); }
+        .subject-icon { font-size: 4em; margin-bottom: 20px; display: block; }
+        .subject-card h3 { color: #2c3e50; margin: 0 0 15px; font-size: 1.8em; font-weight: 700; }
+        .subject-card p { color: #5a6c7d; margin: 0 0 25px; line-height: 1.6; }
+        .view-grades-btn { padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50px; font-weight: 700; font-size: 16px; cursor: pointer; transition: all 0.3s ease; display: block; width: fit-content; margin: 0 auto; text-transform: uppercase; letter-spacing: 1px; text-align: center; }
+        .view-grades-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(102,126,234,0.4); }
+        footer { margin-top: auto; background: #16213e; color: #bdc3c7; text-align: center; padding: 25px; font-size: 14px; }
+        @media (max-width: 768px) { .subjects-container { grid-template-columns: 1fr; padding: 0 15px; } nav ul { flex-direction: column; gap: 15px; align-items: center; } }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>📚 SUBJECTS</h1>
+</header>
+
+<nav>
+    <ul>
+        <li><a href="home.html">🏠 Back to Home</a></li>
+    </ul>
+</nav>
+
+<div class="subjects-container" id="subjects-container"></div>
+
+<footer>
+    <p>&copy; 2026 Grade Recording System</p>
+</footer>
+
+<script type="module">
+    import { db } from './firebase.js';
+    import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    async function loadSubjects() {
+        try {
+            const querySnapshot = await getDocs(collection(db, "subjects"));
+            const container = document.getElementById('subjects-container');
+            
+            if (querySnapshot.empty) {
+                container.innerHTML = "<p>No subjects found.</p>";
+            } else {
+                querySnapshot.forEach((doc) => {
+                    const subject = doc.data();
+                    const subjectCard = document.createElement('a');
+                    subjectCard.href = `records.html?subject_id=${doc.id}`; 
+                    subjectCard.className = 'subject-card';
+                    subjectCard.innerHTML = `
+                        <span class="subject-icon">📚</span>
+                        <h3>${subject.subject_name}</h3>
+                        <p>View and manage student grades.</p>
+                        <button class="view-grades-btn">View Grades →</button> <!-- View Grades button -->
+                    `;
+                    container.appendChild(subjectCard);
+                });
+            }
+        } catch (error) {
+            console.error("Error loading subjects: ", error);
+        }
+    }
+
+    loadSubjects(); 
+</script>
+
+</body>
+</html>

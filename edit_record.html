@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Edit Grade - Grade Recording System</title>
+
+<style>
+body {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+}
+
+header {
+    background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+    color:white;
+    text-align:center;
+    padding:40px 20px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
+
+header h1 {
+    font-size:2.2em;
+    margin:0;
+    text-shadow:0 2px 10px rgba(0,0,0,0.5);
+}
+
+nav {
+    background: rgba(22,33,62,0.95);
+    backdrop-filter:blur(10px);
+    padding:15px 0;
+    box-shadow:0 4px 20px rgba(0,0,0,0.2);
+}
+
+nav ul {
+    display:flex;
+    justify-content:center;
+    gap:40px;
+    list-style:none;
+    margin:0;
+    padding:0;
+}
+
+nav a {
+    color:#ecf0f1;
+    text-decoration:none;
+    font-weight:600;
+    padding:10px 25px;
+    border-radius:25px;
+    transition:all 0.3s ease;
+}
+
+nav a:hover {
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    transform:translateY(-2px);
+}
+
+.form-section {
+    max-width:550px;
+    margin:60px auto;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(20px);
+    border-radius:25px;
+    box-shadow:0 25px 60px rgba(0,0,0,0.25);
+    padding:45px;
+}
+
+.form-section h2 {
+    text-align:center;
+    margin-bottom:35px;
+    color:#2c3e50;
+}
+
+.info-box {
+    background: linear-gradient(135deg, #f8f9ff, #e8f0ff);
+    border-radius:15px;
+    padding:18px;
+    text-align:center;
+    margin-bottom:25px;
+    font-weight:600;
+    color:#2c3e50;
+}
+
+form {
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+label {
+    font-weight:700;
+    color:#2c3e50;
+}
+
+input, select {
+    padding:15px;
+    border-radius:12px;
+    border:2px solid #e1e8ff;
+    font-size:15px;
+    transition:0.3s;
+}
+
+input:focus, select:focus {
+    outline:none;
+    border-color:#667eea;
+    box-shadow:0 5px 20px rgba(102,126,234,0.3);
+}
+
+button {
+    margin-top:10px;
+    padding:16px;
+    border:none;
+    border-radius:50px;
+    background:linear-gradient(135deg,#27ae60,#2ecc71);
+    color:white;
+    font-weight:700;
+    font-size:16px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover {
+    transform:translateY(-3px);
+    box-shadow:0 15px 30px rgba(39,174,96,0.4);
+}
+
+footer {
+    margin-top:auto;
+    background:#16213e;
+    color:#bdc3c7;
+    text-align:center;
+    padding:25px;
+    font-size:14px;
+}
+
+@media(max-width:600px){
+    .form-section{
+        margin:30px 20px;
+        padding:30px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>✏️ Edit Grade</h1>
+</header>
+
+<nav>
+    <ul>
+        <li><a href="subjects.html">📚 Back to Subjects</a></li>
+    </ul>
+</nav>
+
+<div class="form-section">
+    <h2>Update Student Grade</h2>
+
+    <div class="info-box">
+        Editing record for: <span id="studentDisplay">Loading...</span>
+    </div>
+
+    <form id="editRecordForm">
+        <label>Student Name</label>
+        <input type="text" id="student_name" disabled>
+
+        <label>New Grade</label>
+        <select id="grade" required>
+            <option value="R">R (Incomplete)</option>
+            <option value="1.0">1.0</option>
+            <option value="1.5">1.5</option>
+            <option value="2.0">2.0</option>
+            <option value="2.5">2.5</option>
+            <option value="3.0">3.0</option>
+            <option value="3.5">3.5</option>
+            <option value="4.0">4.0</option>
+        </select>
+
+        <button type="submit">Update Grade</button>
+    </form>
+</div>
+
+<footer>
+    <p>&copy; 2026 Grade Recording System</p>
+</footer>
+
+<script type="module">
+import { db } from './firebase.js';
+import { doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const editRecordForm = document.getElementById('editRecordForm');
+const studentNameField = document.getElementById('student_name');
+const gradeSelect = document.getElementById('grade');
+const studentDisplay = document.getElementById('studentDisplay');
+
+const params = new URLSearchParams(window.location.search);
+const gradeId = params.get('grade_id');
+const subjectId = params.get('subject_id');
+
+async function loadRecord() {
+    const gradeDoc = await getDoc(doc(db, "grades", gradeId));
+
+    if (gradeDoc.exists()) {
+        const gradeData = gradeDoc.data();
+        studentNameField.value = gradeData.student_name;
+        studentDisplay.textContent = gradeData.student_name;
+        gradeSelect.value = gradeData.grade;
+    }
+}
+
+async function editRecord(e) {
+    e.preventDefault();
+
+    try {
+        await updateDoc(doc(db, "grades", gradeId), {
+            grade: gradeSelect.value
+        });
+
+        alert("✅ Grade updated successfully!");
+        window.location.href = `records.html?subject_id=${subjectId}`;
+    } catch (error) {
+        console.error("Error updating document: ", error);
+    }
+}
+
+loadRecord();
+editRecordForm.addEventListener('submit', editRecord);
+</script>
+
+</body>
+</html>

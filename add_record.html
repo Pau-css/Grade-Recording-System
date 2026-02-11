@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Student Record</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Arial', sans-serif;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+            padding: 40px 20px;
+            text-align: center;
+            color: white; 
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 25px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 50px;
+            border-radius: 25px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+            color: #333; 
+        }
+
+        .form-card h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: block;
+            color: #333; 
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            transition: 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            margin-top: 20px;
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(39, 174, 96, 0.5);
+        }
+
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 25px;
+            color: white; 
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 0 15px;
+            }
+
+            .form-card {
+                padding: 30px;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>➕ Add Student Grade</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="subjects.html">🏠 Back to Subjects</a></li>
+        </ul>
+    </nav>
+
+    <div class="form-container">
+        <div class="form-card">
+            <h2>New Student Record</h2>
+            <form id="student-form">
+                <div class="form-group">
+                    <label for="subject">Subject *</label>
+                    <select id="subject" name="subject" required>
+                        <option value="subject1">Web Programming</option>
+                        <option value="subject2">Mobile Programming</option>
+                        <option value="subject3">Data Management</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="student_name">Student Name *</label>
+                    <input type="text" id="student_name" name="student_name" required placeholder="Enter student name">
+                </div>
+
+                <div class="form-group">
+                    <label for="grade">Grade *</label>
+                    <select id="grade" name="grade" required>
+                        <option value="R">R (Incomplete)</option>
+                        <option value="1">1.0</option>
+                        <option value="1.5">1.5</option>
+                        <option value="2">2.0</option>
+                        <option value="2.5">2.5</option>
+                        <option value="3">3.0</option>
+                        <option value="3.5">3.5</option>
+                        <option value="4">4.0</option>
+                    </select>
+                </div>
+
+                <button type="submit">Save Student Record</button>
+            </form>
+            <p id="message"></p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Grade Recording System</p>
+    </footer>
+
+    <script type="module">
+        import { db } from './firebase.js';
+        import { collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('student-form');
+            const message = document.getElementById('message');
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault(); 
+
+                const subject = document.getElementById('subject').value;
+                const studentName = document.getElementById('student_name').value;
+                const grade = document.getElementById('grade').value;
+
+                try {
+                    const docRef = await addDoc(collection(db, "grades"), {
+                        subject_id: subject,
+                        student_name: studentName,
+                        grade: grade,
+                    });
+
+                    message.textContent = "Record saved successfully!";
+                    message.style.color = "green";
+
+                    form.reset();
+                } catch (error) {
+                    console.error("Error adding document: ", error);
+                    message.textContent = `Error saving record: ${error.message}`;
+                    message.style.color = "red";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
